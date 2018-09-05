@@ -1,0 +1,390 @@
+create table project(
+id number(5) constraint project_pk  primary key,
+ name varchar2(20) constraint project_name_nn not null,
+email varchar2(20),
+usertype number(4),
+pass varchar2(20)
+);
+
+commit
+desc project
+drop table project
+select * from project
+insert into project values(101,'zaman','zaman.com',1,'zaman');
+insert into project values(102,'sumsush','sumsush.com',2,'sumsush');
+insert into project values(103,'zarin','zarin.com',3,'zarin');
+insert into project values(104,'maliha','maliha.com',4,'maliha');
+
+
+
+trigger:
+
+first oracle a aita diba:
+1. 
+  CREATE TABLE sys_evnt_audit
+ (
+  event_type VARCHAR2(30),
+  logon_date DATE,
+  logon_time VARCHAR2(15),
+  logof_date DATE,
+  logof_time VARCHAR2(15)
+ );
+ thn
+2. CREATE OR REPLACE TRIGGER sys_lgon_audit
+ AFTER LOGON ON SCHEMA
+ BEGIN
+  INSERT INTO sys_evnt_audit VALUES(
+   ora_sysevent,
+   sysdate,
+   TO_CHAR(sysdate, 'hh24:mi:ss'),
+   NULL,
+   NULL
+  );
+  COMMIT;
+ END;
+ /
+
+3.check trigger is empty or not := select * from sys_evnt_audit
+
+ 4. thn data base a dukba mane amader login page theke 
+
+4. now check trigger  select * from sys_evnt_audit
+======================================
+
+its for id auto increament
+
+CREATE SEQUENCE project_seq;
+
+CREATE OR REPLACE TRIGGER project_id
+BEFORE INSERT ON project 
+FOR EACH ROW
+WHEN (new.id IS NULL)
+BEGIN
+  SELECT project_seq.NEXTVAL
+  INTO   :new.id
+  FROM   dual;
+END;
+/
+======================================
+
+logofff
+
+CREATE TABLE sys_evnt_logof
+ (
+  event_type VARCHAR2(30),
+  logon_date DATE,
+  logon_time VARCHAR2(15),
+  logof_date DATE,
+  logof_time VARCHAR2(15)
+ );
+ CREATE OR REPLACE TRIGGER log_off_audit
+ BEFORE LOGOFF ON SCHEMA
+ BEGIN
+  INSERT INTO sys_evnt_logof VALUES
+  (
+   ora_sysevent,
+   NULL,
+   NULL,
+   SYSDATE,
+   TO_CHAR(sysdate, 'hh24:mi:ss')
+  );
+  COMMIT;
+select * from sys_evnt_audit
+select * from sys_evnt_logof
+
+
+
+====================
+booking 
+
+create table roomdetail
+(
+ id   number(5)    constraint roomdetail_pk  primary key,
+ username  varchar2(20) constraint roomdetail_username_nn not null,
+ checkin_date date not null,
+checkout_date date not null,
+room_type    varchar2(50) not null,
+no_of_room    number(15)not null,
+ amount    number(50)not null
+);
+
+
+commit
+
+desc roomdetail
+
+insert into roomdetail values (2, 'boss', '15-May-2001', '18-May-2001', '250', 5, 1250);
+insert into roomdetail values (3, 'ZAMAN', '15-May-2001', '18-May-2001', '250', 5, 1250);
+
+           
+select * from sys_evnt_audit
+select * from roomdetail
+
+CREATE SEQUENCE roomdetail_seq;
+
+CREATE OR REPLACE TRIGGER roomdetail_id
+BEFORE INSERT ON roomdetail
+FOR EACH ROW
+WHEN (new.id IS NULL)
+BEGIN
+  SELECT roomdetail_seq.NEXTVAL
+  INTO   :new.id
+  FROM   dual;
+END;
+/
+===============================
+
+================================================
+registration trigger insert
+
+CREATE TABLE  project_audit (
+  new_name   varchar2(30),
+  old_name   varchar2(30),
+  user_name   varchar2(30),
+  entry_date   varchar2(30),
+  operation   varchar2(30)
+);
+//SET SERVEROUTPUT ON;
+CREATE  OR  REPLACE  TRIGGER  reg_audit
+ BEFORE  INSERT ON project
+ FOR EACH ROW
+
+ DECLARE
+  v_user  varchar2 (30);
+  v_date  varchar2(30);
+ BEGIN
+  SELECT user, TO_CHAR(sysdate, 'MON/DD/YYYY HH24:MI:SS') INTO v_user, v_date FROM dual;
+
+   INSERT INTO project_audit VALUES(:NEW.NAME, Null , v_user, v_date, 'Insert');
+ END;
+ /
+select * from project_audit
+
+========================= employee table procedure
+
+create table emp
+(
+ empno   number(5)    constraint emp_pk  primary key,
+ ename  varchar2(20) constraint emp_ename_nn not null,
+ job varchar2(50),
+sal number(5),
+hire_date date,
+ comm    number(5),
+ depno    varchar2(15)
+ 
+);
+desc emp
+insert into emp values(2,'clone','typer','1670','1-AUG-2013',2,'recorder')
+select * from emp
+CREATE SEQUENCE emp_seq;
+CREATE OR REPLACE TRIGGER emp_id
+BEFORE INSERT ON emp
+FOR EACH ROW
+WHEN (new.empno IS NULL)
+BEGIN
+  SELECT emp_seq.NEXTVAL
+  INTO   :new.empno
+  FROM   dual;
+END;
+/
+drop table emp
+========
+package and procedure
+=================================
+CREATE OR REPLACE PACKAGE emp_admin
+IS
+PROCEDURE hire_emp (
+      p_empno         NUMBER,
+      p_ename         VARCHAR2,
+      p_job           VARCHAR2,
+      p_sal           NUMBER,
+      p_hiredate      DATE DEFAULT sysdate,
+      p_comm          NUMBER 
+      p_mgr           NUMBER,
+      p_deptno        NUMBER 
+   );
+END emp_admin;
+
+CREATE OR REPLACE PACKAGE BODY emp_admin
+IS
+   PROCEDURE hire_emp (
+      p_empno         NUMBER,
+      p_ename         VARCHAR2,
+      p_job           VARCHAR2,
+      p_sal           NUMBER,
+      p_hiredate      DATE    DEFAULT sysdate,
+      p_comm          NUMBER  
+      p_mgr           NUMBER,
+      p_deptno        NUMBER  
+   )
+   AS
+   BEGIN
+      INSERT INTO emp(empno, ename, job, sal, hire_date, comm,depno)
+         VALUES(p_empno, p_ename, p_job, p_sal,
+                p_hiredate, p_comm, p_deptno);
+   END;
+   END emp_admin;
+
+desc emp
+select * from emp;
+begin
+ emp_admin.hire_emp(3,'rsi','user',1550,'13-MAY-2015',4,3);
+end;
+==================================
+select * from bookdetail
+select * from book
+drop table book
+drop table roomtype
+commit
+create table book
+(
+ id   number(5)    constraint book_pk  primary key,
+ name  varchar2(20) constraint book_name_nn not null,
+phone number(15),
+ checkin_date date not null,
+checkout_date date not null,
+room_type    varchar2(50) not null,
+room_price  varchar2(10),
+no_of_room    number(15)not null,
+ amount    number(15)not null
+);
+CREATE TABLE roomtype (
+  room_id number(11) constraint roomtype_pk  primary key,
+  room_type varchar2(50) NOT NULL,
+  room_price varchar2(50) NOT NULL
+
+);
+commit
+INSERT INTO roomtype  VALUES(1, 'Garden view', '100');
+
+INSERT INTO roomtype  VALUES(2, 'sunset view', '200');
+
+INSERT INTO roomtype VALUES(3, 'Street view', '45');
+
+INSERT INTO roomtype VALUES(4, 'sunrise view', '90');
+
+INSERT INTO roomtype VALUES(5, 'Ocean view', '250');
+
+INSERT INTO roomtype  VALUES(6, 'deepsea view', '500');
+
+===================================
+trigger for booking id increment
+
+
+CREATE SEQUENCE book_seq;
+
+CREATE OR REPLACE TRIGGER book_id
+BEFORE INSERT ON book
+FOR EACH ROW
+WHEN (new.id IS NULL)
+BEGIN
+  SELECT book_seq.NEXTVAL
+  INTO   :new.id
+  FROM   dual;
+END;
+/
+===================================admin 
+create table admin
+(
+ id   number(5)    constraint admin_pk  primary key,
+ name  varchar2(20) constraint admin_name_nn not null,
+
+ pass varchar2(10)
+
+);
+commit
+INSERT INTO admin  VALUES(1, 'sumsush', 'sumsush');
+
+INSERT INTO admin  VALUES(2, 'zaman', 'zaman');
+
+INSERT INTO admin VALUES(3, 'maliha', 'maliha');
+
+INSERT INTO admin  VALUES(4, 'zarin', 'zarin');
+select * from admin
+================================booking triger
+
+select * from booking_audit
+CREATE TABLE  booking_audit (
+  new_name   varchar2(30),
+  old_name   varchar2(30),
+  user_name   varchar2(30),
+  entry_date   varchar2(30),
+  operation   varchar2(30)
+);
+CREATE  OR  REPLACE  TRIGGER  user_book_audit
+ BEFORE  INSERT  OR DELETE  OR UPDATE  ON  book
+ FOR EACH ROW
+
+ DECLARE
+  v_user  varchar2 (30);
+  v_date  varchar2(30);
+ BEGIN
+  SELECT user, TO_CHAR(sysdate, 'DD/MON/YYYY HH24:MI:SS') INTO v_user, v_date FROM dual;
+
+  IF INSERTING THEN
+   INSERT INTO booking_audit (new_name,old_name, user_name, entry_date, operation)
+   VALUES(:NEW.NAME, Null , v_user, v_date, 'Insert');
+
+  ELSIF DELETING THEN
+   INSERT INTO booking_audit (new_name,old_name, user_name, entry_date, operation)
+   VALUES(NULL,:OLD.NAME, v_user, v_date, 'Delete');
+
+  ELSIF UPDATING THEN
+   INSERT INTO booking_audit (new_name,old_name, user_name, entry_date, operation)
+   VALUES(:NEW.NAME, :OLD.NAME, v_user, v_date,'Update');
+  END IF;
+ END;
+ /
+
+
+
+===============================booking record
+
+DECLARE
+  CURSOR booking IS
+  SELECT name, amount FROM book
+  WHERE amount > 200;
+
+book_rec  booking%ROWTYPE;
+
+BEGIN 
+OPEN booking; 
+LOOP 
+FETCH booking INTO book_rec;
+ EXIT WHEN booking%NOTFOUND; 
+DBMS_OUTPUT.PUT_LINE (book_rec.name||' '||book_rec.amount ); 
+END LOOP;
+CLOSE booking;
+ END;
+
+============================================post
+
+
+create table post(
+userid number(5) constraint post_pk  primary key,
+ptitle varchar2(20) constraint post_ptitle_nn not null,
+pcategory varchar2(30),
+pcontent varchar2(1000)
+
+);
+userid,ptitle,pcategory,pcontent
+commit
+insert into post values(post_seq.NEXTVAL,'travelar','dhaka','dhaka is the most populated country in the world')
+CREATE SEQUENCE post_seq;
+select * from post
+CREATE OR REPLACE TRIGGER post_id
+BEFORE INSERT ON post 
+FOR EACH ROW
+WHEN (new.userid IS NULL)
+BEGIN
+  SELECT post_seq.NEXTVAL
+  INTO   :new.userid
+  FROM   dual;
+END;
+/
+
+
+
+
+
+===================================================

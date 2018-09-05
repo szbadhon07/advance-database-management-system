@@ -1,0 +1,35 @@
+1.select * from project //carry login table and registration table info
+
+2.select * from book //carry booking info
+
+3. select * from roomtype //carry roomtype info
+
+
+login trigger
+
+4.select * from sys_evnt_audit
+
+logout trigger
+
+5.select * from sys_evnt_logof
+
+
+
+trigger used auto increment in registration id
+
+6. CREATE SEQUENCE project_seq; 
+
+trigger for auto inc in booking foe book table
+
+7.CREATE SEQUENCE book_seq;
+
+trigger for registration entry and user entry 
+
+8. select * from project_audit
+
+trigger for user booking
+
+
+9.select * from booking_audit
+
+
